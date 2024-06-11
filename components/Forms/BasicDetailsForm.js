@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useContext, useEffect, useState, useMemo } from 'react';
+import { useContext, useEffect, useState, useMemo, useRef } from 'react';
 import { Select as CustomSelect } from './formComponents/Select';
 import { FormOptionsContext } from '../../pages/facilities/add';
 import {
@@ -31,7 +31,11 @@ export function BasicDeatilsForm({ editMode }) {
   // State
   const [isClient, setIsClient] = useState(false)
   const [totalFunctionalBeds, setTotalFunctionalBeds] = useState(0)
+
+  const submitType = useRef(null)
+
   const [facilityId, setFacilityId] = useMemo(() => {
+    
     let id = ''
 
     function setId(_id) {
@@ -70,6 +74,7 @@ export function BasicDeatilsForm({ editMode }) {
   const [subCountyOptions, setSubCountyOptions] = useState(options?.sub_counties)
   const [constituencyOptions, setConstituencyOptions] = useState(options?.constituencies)
   const [wardOptions, setWardOptions] = useState(options?.wards)
+  
   const operationStatusOptions = [
     {
       value: '190f470f-9678-47c3-a771-de7ceebfc53c',
@@ -327,7 +332,6 @@ export function BasicDeatilsForm({ editMode }) {
 
     const data = Object.fromEntries(formData)
 
-   
 
     setSubmitting(true)
 
@@ -347,12 +351,14 @@ export function BasicDeatilsForm({ editMode }) {
           alert.success('Facility Updated Successfully')
           setSubmitting(false)
 
-          router.push({
-            pathname: '/facilities/facility_changes/[facility_id]/',
-            query: {
-              facility_id: options?.data?.id
-            }
-          })
+          if(submitType.current == null){
+            router.push({
+              pathname: '/facilities/facility_changes/[facility_id]/',
+              query: {
+                facility_id: options?.data?.id
+              }
+            })
+          } 
 
         } else {
           alert.error('Unable to update facility')
@@ -1361,7 +1367,7 @@ export function BasicDeatilsForm({ editMode }) {
             <label
               htmlFor='reporting_in_dhis'
               className='text-gray-700 capitalize text-sm flex-grow'>
-              *Should this facility have reporting in DHIS2?{' '}
+              *Is this facililty reporting ?{' '}
 
             </label>
             <span className='flex items-center gap-x-1'>
@@ -1828,9 +1834,10 @@ export function BasicDeatilsForm({ editMode }) {
         {
           editMode ?
 
-            <div className='flex justify-end items-center w-full'>
+            <div className='flex justify-end gap-3 items-center w-full'>
               <button
                 type='submit'
+                onClick={() => {submitType.current = "continue"}}
                 disabled={submitting}
                 className={`flex items-center ${submitting ? 'justify-center' : 'justify-start'} space-x-2 bg-blue-700  p-1 px-2`}>
                 <span className='text-medium font-semibold text-white'>
@@ -1841,7 +1848,25 @@ export function BasicDeatilsForm({ editMode }) {
                         <Spinner />
                       </div>
                       :
-                      'Save & Finish'
+                      'Save and Continue'
+
+                  }
+                </span>
+                {/* <ChevronDoubleRightIcon className='w-4 h-4 text-white' /> */}
+              </button>
+              <button
+                type='submit'
+                disabled={submitting && submitType.current == null}
+                className={`flex items-center ${submitting ? 'justify-center' : 'justify-start'} space-x-2 bg-blue-700  p-1 px-2`}>
+                <span className='text-medium font-semibold text-white'>
+                  {
+                    submitting && submitType.current == null ?
+                      <div className='flex items-center gap-2'>
+                        <span className='text-white'>Saving.. </span>
+                        <Spinner />
+                      </div>
+                      :
+                      'Save and Finish'
 
                   }
                 </span>
