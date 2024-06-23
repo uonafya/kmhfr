@@ -180,11 +180,7 @@ function EditListItem({
 
   useEffect(() => {
 
-    // setallServices(itemData)
-
     const currentUrl = new URL(window.document.location.href)
-
-    // console.log({itemName, from: })
 
     const fromParam = currentUrl.searchParams.get("from")
 
@@ -207,7 +203,6 @@ function EditListItem({
 
         if (itemName == 'facility_services' && currentUrl.searchParams.get("from") !== "previous") {
 
-          // console.log("setting selectedItems")
           itemData.currentServices?.map((service) => {
             result.push({ sname: service.service_name, rowid: service.service_id, category_id: service.category_id, category_name: service.category_name })
           })
@@ -231,6 +226,8 @@ function EditListItem({
       setShowItemCategory(true)
     }
   }
+
+
 
 
   function handleSubmit(e) {
@@ -259,21 +256,18 @@ function EditListItem({
       if(/partner_\d/.test(key)) delete payload[key]
     }
 
-    
 
     for(let [key, value] of formData.entries()){
       if(/has_+/.test(key)) payload[key] = value == "true"
     }
-
  
-    console.log({payload})
 
-    if (itemData) {
+    if (itemData && editMode) {
 
-      const newSelectedItems = selectedItems.filter(({ rowId }, i) => rowId == itemData.currentServices[i]?.service_id)
-
+      const newSelectedItems = !editMode ? selectedItems : selectedItems.filter(({ rowId }, i) => rowId == itemData?.currentServices[i]?.service_id)
 
       if (itemName == 'facility_services') {
+        
         handleItemsUpdate(token, [newSelectedItems, itemId])
           .then(resp => {
             if (resp.status == 200 || resp.status == 204) {
@@ -342,8 +336,9 @@ function EditListItem({
     }
     else {
       if (itemName == "facility_services") {
-        if(typeof handleItemsSubmit == 'function' && itemId){
 
+        if(typeof handleItemsSubmit == 'function' && itemId){
+        
         handleItemsSubmit(token, selectedItems, itemId)
           .then((resp) => {
             if (resp.ok) {
@@ -417,7 +412,7 @@ function EditListItem({
           .catch(e => console.error('unable to submit item data. Error:', e.message))
         }
       } else {
-
+       
         if(typeof handleItemsSubmit == 'function' && itemId){
 
         handleItemsSubmit(payload, selectedItems, itemId)
@@ -803,12 +798,12 @@ function EditListItem({
           <button
             type="submit"
             onClick={() => {submitType.current = 'continue'}}
-            disabled={submitting}
+            disabled={submitting && submitType.current == 'continue'}
             className="flex items-center justify-end space-x-2 bg-blue-600   p-1 px-2"
           >
             <span className="text-medium font-semibold text-white">
               {
-                submitting ?
+                submitting && submitType.current == 'continue' ?
                   <Spinner />
                   :
                   'Save and continue'
@@ -830,7 +825,7 @@ function EditListItem({
           <button
             type="submit"
             disabled={submitting && submitType.current == null}
-            className="flex items-center justify-end space-x-2 bg-blue-600   p-1 px-2"
+            className="flex items-center justify-end space-x-2 bg-blue-600  p-1 px-2"
           >
             <span className="text-medium font-semibold text-white">
               {

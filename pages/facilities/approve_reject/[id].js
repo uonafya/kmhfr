@@ -296,7 +296,7 @@ function ApproveReject(props) {
 
             {/* Comments and Updates Section  */}
 
-            <div className="bg-gray-50 rounded shadow-md w-full p-3  flex flex-col gap-3 mt-6">
+            <div className="bg-gray-50 rounded shadow-md w-full p-4  flex flex-col gap-3 mt-6">
               <h3 className="text-gray-900 text-2xl font-semibold leading-16 text-medium">
                 {facility?.has_edits ? 'Approve Or Invalidate Updates' : facility?.is_approved ? "Approval Or Reject facility" : "Comment on the validation"}
               </h3>
@@ -306,6 +306,7 @@ function ApproveReject(props) {
                   comment: ''
                 }}
                 onSubmit={async ({ comment }) => {
+                  
                   
                   // if facility is not validated and has no edits
                   if (!facility?.approved && !facility?.has_edits) {
@@ -318,6 +319,7 @@ function ApproveReject(props) {
                   // if facility is not approved and is validated
                   if (!facility?.approved_national_level && facility?.approved) {
                     // console.log('FACILITY WILL BE APPROVED')
+                    
                     approveRejectFacility(facility?.id, comment, alert, reject, props?.token, setSubmitting, setRejecting, setFormError)
                   }
                 }
@@ -328,17 +330,16 @@ function ApproveReject(props) {
                 >
                    {/* Alert Section */}
             
-                  {formError && <Alert severity='error' className='w-full border-2 border-red-500 rounded-none'>{formError}</Alert>}
+                  {formError && <Alert severity='error' className='w-full border-2 border-red-500 rounded-none'><code>{formError}</code></Alert>}
 
 
                   {
                     !facility?.has_edits ?
                       <Field
                         as="textarea"
-                        cols="135"
                         rows="auto"
                         name="comment"
-                        className="flex rounded col-span-2 bg-transparent border focus:ring-1 focus:ring-blue-900 border-gray-600 text-gray-600 font-normal text-medium p-2"
+                        className="flex rounded col-span-2 w-full bg-transparent border focus:ring-1 focus:ring-blue-900 border-gray-600 text-gray-600 font-normal text-medium p-2"
                         placeholder="Enter a comment"
 
                       ></Field>
@@ -403,6 +404,7 @@ function ApproveReject(props) {
     return null
   }
 }
+
 
 ApproveReject.getInitialProps = async (ctx) => {
   const allOptions = {};
