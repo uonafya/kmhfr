@@ -32,6 +32,7 @@ function FacilityHome (props){
     const filters = props?.filters
     const fltrs = props?.filters
     const userCtx = useContext(UserContext);
+    
 
     // const qf = props?.query?.qf ?? null
     
@@ -208,14 +209,16 @@ function FacilityHome (props){
                             <Menu as="div" className="relative">
                                 {/* Button group */}
                              
-                                {
-                                (
-                                    userCtx?.groups[0]?.id == 2 || // SCHRIO
-                                    userCtx?.groups[0]?.id == 7    // SuperAdmin
-                                    /*allFctsSelected || pathId === 'all'*/) &&
-                                <div className='flex flex-col gap-5 md:flex-row md:items-center md:space-x-6 w-auto'>
+                                
+                                <div className='flex flex-col z-40 gap-5 md:flex-row md:items-center md:space-x-6 w-auto'>
                                     {/* Facility Button */}
-                                    {
+                                    
+
+                                     {
+                                        (
+                                            userCtx?.groups[0]?.id == 2 || // SCHRIO
+                                            userCtx?.groups[0]?.id == 7    // SuperAdmin
+                                            /*allFctsSelected || pathId === 'all'*/) &&
                                      // Display add facility button if  user belong to SCHRIO group
 
                                    <Menu.Item as="div"  className="px-3 py-2 bg-gray-600 rounded text-white text-md tracking-tighter font-semibold whitespace-nowrap  hover:bg-black focus:bg-black active:bg-black uppercase">
@@ -234,38 +237,38 @@ function FacilityHome (props){
                                         <ChevronDownIcon className="w-4 h-4 ml-2" />
                                     </Menu.Button>
                                 </div>
-                                }
+                                
                             
-                                <Menu.Items as="ul" className="absolute top-10 right-0 z-30 mb-3 flex flex-col gap-y-1 items-center justify-start bg-white  shadow-lg border border-gray-200 p-1 w-1/2">
+                                <Menu.Items as="ul" className="absolute top-0 left-[100%] w-auto flex flex-col gap-y-1 items-center justify-start bg-white  shadow-lg border border-gray-200 p-1">
                                    
                                     <Menu.Item as="li" className="p-0 flex items-center w-full text-center hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-200">
                                         {({ active }) => (
                                             <button className={"flex items-center justify-start text-center hover:bg-gray-200 focus:bg-gray-200 text-gray-800 font-medium active:bg-gray-200 py-2 px-1 w-full " + (active ? 'bg-gray-200' : '')} onClick={() => {
-                                                let dl_url = props?.current_url
-                                                if (dl_url.includes('?')) { dl_url += `&format=csv&access_token=${props?.token}` } else { dl_url += `?format=csv&access_token=${props?.token}` }
-                                                // console.log('Downloading CSV. ' + dl_url || '')
-                                                // window.open(dl_url, '_blank', 'noopener noreferrer')
-                                                window.location.href = dl_url
+                                                  
+                                                window.location.href = `${process.env.NEXT_PUBLIC_FACILITY_EXPORT_URL}?&access_token=${props?.token}&format=csv&page_size=${props?.count}&page=1`
+                                              
                                             }}>
                                                 <DownloadIcon className="w-4 h-4 mr-1" />
                                                 <span className='text-base uppercase font-semibold'>CSV</span>
                                             </button>
                                         )}
                                     </Menu.Item>
+
                                     <Menu.Item as="li" className="p-0 flex items-center w-full text-center hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-200">
                                         {({ active }) => (
-                                            <button className={"flex items-center justify-start text-center hover:bg-gray-200 focus:bg-gray-200 text-gray-800 font-medium active:bg-gray-200 py-2 px-1 w-full " + (active ? 'bg-gray-200' : '')} onClick={() => {
-                                                let dl_url = props?.current_url
-                                                if (dl_url.includes('?')) { dl_url += `&format=excel&access_token=${props?.token}` } else { dl_url += `?format=excel&access_token=${props?.token}` }
-                                                console.log('Downloading Excel. ' + dl_url || '')
-                                                // window.open(dl_url, '_blank', 'noopener noreferrer')
-                                                window.location.href = dl_url
+                                            <button className={"flex items-center justify-start text-center hover:bg-gray-200 focus:bg-gray-200 text-gray-800 font-medium active:bg-gray-200 py-2 px-1 w-full " + (active ? 'bg-gray-200' : '')} 
+                                            onClick={() => {
+                                               
+                                                
+                                                 window.location.href = `${process.env.NEXT_PUBLIC_FACILITY_EXPORT_URL}?access_token=${props?.token}&format=excel&page_size=${props?.count}&page=1`
+                                               
                                             }}>
                                                 <DownloadIcon className="w-4 h-4 mr-1" />
-                                                <span>Excel</span>
+                                                <span className='text-base uppercase font-semibold'>Excel</span>
                                             </button>
                                         )}
                                     </Menu.Item>
+
                                 </Menu.Items>
                             </Menu>
                             }
@@ -276,14 +279,12 @@ function FacilityHome (props){
 
                         </div>
 
-                         {/* Hidden */}
                         <div className="flex-wrap items-center justify-between gap-2 text-sm md:text-base ">
                   
 
                             {/* Accordion Filter */}
-
                             <Accordion 
-                            sx={{borderRadius:'4px', boxShadow:'none', zIndex: '0px', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px'}} className='border bg-gray-50 border-gray-200  mb-4 w-full shadow-none' expanded={isAccordionExpanded} onChange={handleAccordionExpand}>
+                            sx={{borderRadius:'4px', boxShadow:'none', zIndex: '0px', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px'}} className='border bg-gray-50 z-0 border-gray-200  mb-4 w-full shadow-none' expanded={isAccordionExpanded} onChange={handleAccordionExpand}>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon />}
                                                 aria-controls="panel1a-content"
@@ -459,6 +460,7 @@ function FacilityHome (props){
                                             </AccordionDetails>
                             </Accordion> 
                         
+                           
                         </div>
                         
                       
