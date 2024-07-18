@@ -1,12 +1,13 @@
-import {CommunityUnitEditForm } from '../../../components/Forms/CommunityUnitsForms'
-import {useState, useEffect, createContext} from 'react'
+import { CommunityUnitEditForm } from '../../../components/Forms/CommunityUnitsForms'
+import { useState, useEffect, createContext } from 'react'
 import { checkToken } from '../../../controllers/auth/auth'
+import {z} from 'zod'
 // import Alert from '@mui/material/Alert'
 
 
 export const ChuOptionsContext = createContext()
 
-export default function CommunityUnitEdit (props){
+export default function CommunityUnitEdit(props) {
   // console.log({props})
 
   const [isClient, setIsClient] = useState(false)
@@ -14,21 +15,21 @@ export default function CommunityUnitEdit (props){
   useEffect(() => {
     setIsClient(true)
   }, [])
-  
 
-  if(isClient){
+
+  if (isClient) {
 
     return (
       <ChuOptionsContext.Provider value={{
-          facilities: props?.facilities,
-          services: props?.services,
-          statuses: props?.statuses,
-          contactTypes: props?.contact_types
+        facilities: props?.facilities,
+        services: props?.services,
+        statuses: props?.statuses,
+        contactTypes: props?.contact_types
       }}>
-          <CommunityUnitEditForm props={{...props?.cu, token: props?.token}} />
+        <CommunityUnitEditForm props={{ ...props?.cu, token: props?.token }} />
       </ChuOptionsContext.Provider>
-          )
-  }else {
+    )
+  } else {
     return null
   }
 
@@ -38,10 +39,10 @@ export default function CommunityUnitEdit (props){
 
 export async function getServerSideProps(ctx) {
 
-  const {token} = await checkToken(ctx?.req, ctx?.res)
+  const { token } = await checkToken(ctx?.req, ctx?.res)
 
   const response = {}
-  
+
   const options = [
     "cu",
     "statuses",
@@ -50,119 +51,130 @@ export async function getServerSideProps(ctx) {
     "services"
   ]
 
+  const zSchema = z.object({
+    id: z.string().uuid('Should be a uuid string'),
+  })
 
-  async function getFacilityCount(token) {
-    try {
-    return (await (await fetch(`${process.env.NEXT_PUBLIC_API_URL}/facilities/facilities/`, {
-      headers:{
-        'Authorization': 'Bearer ' + token,
-        'Accept': 'application/json'
+
+  const queryId = zSchema.parse(ctx.query).id
+
+
+  function fetchFacilities(url) {
+
+    return fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
       }
+    })
+    .then(resp => resp.json())
+    .then((resp) => {
+        const params = `?sub_county=${resp?.results[0].id}&fields=id,name,county,sub_county_name,constituency,ward_name`
 
-    })).json())?.count
-    }
-    catch (e) {
-      console.error(e.message)
-    }
+        return fetch(`${process.env.NEXT_PUBLIC_API_URL}/facilities/facilities/${params}&reporting_in_dhis=true&owner_type=6a833136-5f50-46d9-b1f9-5f961a42249f`, {
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+          }
+
+        })
+        .then(resp => resp.json())
+        .then(resp => {
+          return resp?.results?.map(({ id, name }) => ({ label: name, value: id }))
+        })
+        .catch(console.error)
+    })
+    .catch(e => console.error('Error: ', e.message))
   }
 
-  // const count = await getFacilityCount(token)
 
 
-  async function getProps(token, options){
+  async function getProps(token, options) {
 
-  try {
-      
-      if(token.error) throw Error('Unable to get token')
+    try {
 
-      for( let option of options){
-      switch(option){ 
+      if (token.error) throw Error('Unable to get token')
 
-        case "cu":
-            const cu = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/units/${ctx?.query.id}/`,{
-            headers:{
-              'Authorization': 'Bearer ' + token,
-              'Accept': 'application/json'
-            }
-            
-          })
+      for (let option of options) {
+        switch (option) {
 
-          response["cu"] =  await (await cu.json())
+          case "cu":
+            const cu = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/units/${queryId}/`, {
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+              }
 
-          break;
+            })
 
-      case "statuses":
-        const statuses = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/statuses/?fields=id,name`,{
-          headers:{
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/json'
-          }
-          
-        })
+            response["cu"] = await (await cu.json())
 
-        response["statuses"] =  (await (await statuses.json()))?.results?.map(({ id, name }) => ({ label: name, value: id }))
-        break;
+            break;
 
-      case "facilities":
+          case "statuses":
+            const statuses = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/statuses/?fields=id,name`, {
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+              }
 
-        // page_size=${count > 500 ? '500' : count}& ; For limiting number of CHUs
-        const params = response?.cu !== undefined ? `?ward=${response?.cu?.geo_features?.properties?.ward}&fields=id,name,county,sub_county_name,constituency,ward_name` : '?fields=id,name,county,sub_county_name,constituency,ward_name';
+            })
 
-        const facilities = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/facilities/facilities/${params}&reporting_in_dhis=true&owner_type=6a833136-5f50-46d9-b1f9-5f961a42249f`,{
-          headers:{
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/json'  
-          }
-          
-        })
+            response["statuses"] = (await (await statuses.json()))?.results?.map(({ id, name }) => ({ label: name, value: id }))
+            break;
 
-        response["facilities"] =  (await (await facilities.json()))?.results?.map(({ id, name }) => ({ label: name, value: id })) 
-        break;
+          case "facilities":
 
-      case "contact_types":
-        const contact_types = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/common/contact_types/?fields=id,name`,{
-          headers:{
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/json'
-          }
-          
-        })
+            const url =  `${process.env.NEXT_PUBLIC_API_URL}/common/sub_counties/?name=${response?.cu?.facility_subcounty.split(' ').join('+')}` 
 
-        response["contact_types"] =  (await (await contact_types.json()))?.results?.map(({ id, name }) => ({ label: name, value: id }))
-        break;
+            response['facilities'] = await fetchFacilities(url)
 
-      case "services":
-        const services = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/services/?page_size=100&ordering=name`,{
-          headers:{
-            'Authorization': 'Bearer ' + token,
-            'Accept': 'application/json'
-          }
-          
-        })
+            break;
 
-        response["services"] =  (await (await services.json()))?.results
-        break;
+          case "contact_types":
+            const contact_types = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/common/contact_types/?fields=id,name`, {
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+              }
+
+            })
+
+            response["contact_types"] = (await (await contact_types.json()))?.results?.map(({ id, name }) => ({ label: name, value: id }))
+            break;
+
+          case "services":
+            const services = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chul/services/?page_size=100&ordering=name`, {
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Accept': 'application/json'
+              }
+
+            })
+
+            response["services"] = (await (await services.json()))?.results
+            break;
+        }
       }
-      } 
 
       response['token'] = token
 
 
     }
-  catch(e) {
-    console.error(e.message)
+    catch (e) {
+      console.error(e.message)
+    }
+
+    return response
+
   }
 
-  return response
+  const props = await getProps(token, options)
 
-}
-
-const props = await getProps(token, options)
-
-// console.log({props})
+  // console.log({props})
 
   return {
-    props 
+    props
   }
 
 }
