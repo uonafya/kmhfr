@@ -918,9 +918,10 @@ function User(props){
 	}
 }
 
+
 User.getInitialProps = async (ctx) => {
 	const zSchema = z.object({
-		id: z.string().uuid('Should be a uuid string'),
+		id: z.string().optional(),
 	  })
 	
 	
@@ -1093,5 +1094,6 @@ User.getInitialProps = async (ctx) => {
 	}
 
 }
+
 
 export default withRouter(User)
