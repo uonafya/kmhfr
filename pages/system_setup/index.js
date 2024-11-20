@@ -937,7 +937,7 @@ function SystemSetup(props) {
     }
 
     async function handleDelete(path) {
-        await fetch(`/api/system_setup/submit_form/?path=${path}&id=${editData.id}&resourceCategory=${resourceCategory}`, {
+        await fetch(`/api/system_setup/submit_form/?path=${path}&id=${editData[0].id}&resourceCategory=${resourceCategory}`, {
             method: 'DELETE'
         })
         setEditMode(false); setEditID(null); setIsAddForm(false); setEditData([])
@@ -1139,7 +1139,7 @@ function SystemSetup(props) {
 
 
                     break;
-                case 'sub_county':
+                case 'sub county':
                     url = [`/api/system_setup/data/?resource=${resource}&resourceCategory=${resourceCategory}&id=${editID}`,
                     `/api/system_setup/data/?resource=wards&resourceCategory=${resourceCategory}&sub_county=${editID}`,
                     ]
@@ -1255,7 +1255,7 @@ function SystemSetup(props) {
                                     }
                                 }>
                                     <span className="flex gap-2">
-                                        Are you sure you want to delete<b>{editData.name}</b> ?
+                                        Are you sure you want to delete<b>{editData[0].name}</b> ?
                                     </span>
                                     <div className='flex justify-start gap-4 mt-4'>
                                         <button className="bg-gray-500 text-white font-semibold  p-2 text-center" type="button" onClick={() => { handleDelete(addBtnLabel); setOpen(false) }}>Yes</button>
@@ -1833,7 +1833,7 @@ function SystemSetup(props) {
 
                                                                         }
                                                                     </button>
-                                                                    <button onClick={e => { e.preventDefault(); setIsAddForm(false); setFields(['id', 'name', 'code']); setResource('counties'); setResourceCategory('AdminUnits'); setTitle('counties'); setAddBtnLabel('county'); setEditMode(false); setEditID(null) }} className='p-2 text-gray-600 border-2 border-gray-600 rounded  font-semibold' >cancel</button>
+                                                                    <button onClick={e => { e.preventDefault(); setIsAddForm(false); setFields(['id', 'name', 'code']); setResource('counties'); setResourceCategory('AdminUnits'); setTitle('counties'); setAddBtnLabel('county'); setEditMode(false); setEditID(null); setEditData([]) }} className='p-2 text-gray-600 border-2 border-gray-600 rounded  font-semibold' >cancel</button>
                                                                 </div>
                                                             </form>
                                                             &nbsp;
@@ -1965,7 +1965,7 @@ function SystemSetup(props) {
                                                                         placeholder='Sub County Name'
                                                                         id={`add_${addBtnLabel}_sub_county_field`}
                                                                         name='name'
-                                                                        defaultValue={editData?.name}
+                                                                        defaultValue={editData[0]?.name}
                                                                         className='flex-none w-full bg-transparent rounded p-2 flex-grow border placeholder-gray-500 border-gray-600 focus:shadow-none focus:border-black outline-none'
                                                                     />
                                                                 </div>
@@ -1986,7 +1986,7 @@ function SystemSetup(props) {
                                                                             placeholder='Sub County Code'
                                                                             id={`add_${addBtnLabel}`}
                                                                             name='code'
-                                                                            defaultValue={editData?.code}
+                                                                            defaultValue={editData[0]?.code}
                                                                             className='flex-none w-full bg-transparent rounded p-2 flex-grow border placeholder-gray-500 border-gray-600 focus:shadow-none focus:border-black outline-none'
                                                                         />
 
@@ -2024,7 +2024,8 @@ function SystemSetup(props) {
                                                                         placeholder='Select '
                                                                         id={`add_${addBtnLabel}_county_field`}
                                                                         name='county'
-                                                                        defaultValue={{value: editData?.county, label: editData?.name}}
+                                                                        key={editData[0]?.county}
+                                                                        defaultValue={{value: editData[0]?.county, label: editData[0]?.county_name}}
                                                                         className='flex-none rounded w-full border border-gray-600 bg-transparent flex-grow placeholder-gray-500 focus:border-gray-600 outline-none'
                                                                     />
 
@@ -2046,7 +2047,7 @@ function SystemSetup(props) {
 
                                                                         }
                                                                     </button>
-                                                                    <button  onClick={(e) => { e.preventDefault(); setIsAddForm(false); setAddBtnLabel('sub county'); setTitle('Sub Counties'); setFields(['id', 'name', 'code']); setResource('sub_counties') }} className='p-2 text-gray-600 border-2 border-gray-600 rounded  font-semibold' >cancel</button>
+                                                                    <button  onClick={(e) => { e.preventDefault(); setIsAddForm(false); setAddBtnLabel('sub county'); setTitle('Sub Counties'); setFields(['id', 'name', 'code']); setResource('sub_counties');setEditMode(false); setEditID(null); setEditData([]) }} className='p-2 text-gray-600 border-2 border-gray-600 rounded  font-semibold' >cancel</button>
                                                                 </div>
                                                             </form>
                                                             &nbsp;
@@ -2177,7 +2178,8 @@ function SystemSetup(props) {
                                                                             }),
 
                                                                         }}
-                                                                        options={selectOptions}
+                                                                        // options={selectOptions}
+                                                                        options={props?.data?.results?.map(({id, name}) => ({label: name, value: id}))}
                                                                         required
                                                                         placeholder='Select '
                                                                         id={`add_${addBtnLabel}_county_field`}

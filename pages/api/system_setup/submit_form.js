@@ -36,7 +36,7 @@ export default async function postSystemSetupData(req, res) {
                 contentType = 'application/json;charset=utf-8';
             break; 
             case 'sub county':
-                url = req.method == 'PATCH' ? `${API_URL}/common/sub_counties/${id}/` : `${API_URL}/common/sub_counties/`
+                url = (req.method == 'PATCH' || req.method == 'DELETE') ? `${API_URL}/common/sub_counties/${id}/` : `${API_URL}/common/sub_counties/`
                 contentType = 'application/json;charset=utf-8';
             break;
             case 'constituency':
